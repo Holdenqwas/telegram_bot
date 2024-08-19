@@ -5,6 +5,17 @@ import json
 import data
 import menu
 
+async def get_last_value(name_training, name_exercise):
+    async with aiohttp.ClientSession() as session:
+        url = os.getenv("BACKEND_URL") + f"training/{name_training}/{name_exercise}"
+        headers = {'content-type': "application/json"}
+
+        async with session.get(url, headers=headers) as response:
+            text = await response.text()
+            print("Status:", response.status, "Body:", text)
+            return text
+
+
 async def start_training(name, weight):
     async with aiohttp.ClientSession() as session:
         url = os.getenv("BACKEND_URL") + "training/create"
@@ -12,12 +23,8 @@ async def start_training(name, weight):
         data = {"weight": weight,
                 "name_training": name}
         async with session.post(url, data=json.dumps(data), headers=headers) as response:
-
-            print("Status:", response.status)
-            print("Content-type:", response.headers['content-type'])
-
             html = await response.text()
-            print("Body:", html)
+            print("Status:", response.status, "Body:", html)
 
 
 async def write_exercise(name_training, name_exercise, value):
@@ -28,10 +35,8 @@ async def write_exercise(name_training, name_exercise, value):
               "name_exercise": name_exercise,
               "value": value}
         async with session.post(url, data=json.dumps(data), headers=headers) as response:
-
-            print("Status:", response.status)
             html = await response.text()
-            print("Body:", html)
+            print("Status:", response.status, "Body:", html)
 
 
 async def next_func(bot, message, state, uid):
@@ -42,7 +47,15 @@ async def next_func(bot, message, state, uid):
     if index < len(parent_menu.items):
         next_menu_name = parent_menu.items[index]
         state.push_menu(uid, next_menu_name)
-        await bot.send_message(message.from_user.id, next_menu_name)
+
+        prev_value = ""
+
+        if message.text != "Вес":
+            print("sending", state.get_menu(uid, 2), state.get_menu(uid))
+            val = await get_last_value(state.get_menu(uid, 2), state.get_menu(uid))
+            prev_value += f" - {val}"
+
+        await bot.send_message(message.from_user.id, next_menu_name + prev_value)
     else:
         parent_menu_name = state.back_menu(uid)
         parent_menu = getattr(menu, parent_menu_name)
@@ -75,10 +88,14 @@ async def training_handler(bot, message, state):
           or message.text in data.train_breast_menu
           or message.text in data.train_breast_menu):
         state.push_menu(uid, message.text)
+        prev_value = ""
+        if message.text != "Вес":
+            print("sending", state.get_menu(uid, 2), state.get_menu(uid))
+            val = await get_last_value(state.get_menu(uid, 2), state.get_menu(uid))
+            prev_value += f" - {val}"
         await bot.send_message(message.from_user.id,
-                               message.text,
+                               message.text + prev_value,
                                reply_markup=menu.train_exercise_menu.markup)
-
     else:
         if state.get_menu(uid) == "Вес":
             await start_training(state.get_menu(uid, 2), message.text)
