@@ -1,5 +1,37 @@
+import aiohttp
+import os
+import json
+
 import data
 import menu
+
+async def start_training(name, weight):
+    async with aiohttp.ClientSession() as session:
+        url = os.getenv("BACKEND_URL") + "training/create"
+        headers = {'content-type': "application/json"}
+        data = {"weight": weight,
+                "name_training": name}
+        async with session.post(url, data=json.dumps(data), headers=headers) as response:
+
+            print("Status:", response.status)
+            print("Content-type:", response.headers['content-type'])
+
+            html = await response.text()
+            print("Body:", html)
+
+
+async def write_exercise(name_training, name_exercise, value):
+    async with aiohttp.ClientSession() as session:
+        url = os.getenv("BACKEND_URL") + "training/write_exercise"
+        headers = {'content-type': "application/json"}
+        data = {  "name_training": name_training,
+              "name_exercise": name_exercise,
+              "value": value}
+        async with session.post(url, data=json.dumps(data), headers=headers) as response:
+
+            print("Status:", response.status)
+            html = await response.text()
+            print("Body:", html)
 
 
 async def next_func(bot, message, state, uid):
@@ -46,6 +78,11 @@ async def training_handler(bot, message, state):
         await bot.send_message(message.from_user.id,
                                message.text,
                                reply_markup=menu.train_exercise_menu.markup)
+
     else:
+        if state.get_menu(uid) == "Вес":
+            await start_training(state.get_menu(uid, 2), message.text)
+        else:
+            await write_exercise(state.get_menu(uid, 2), state.get_menu(uid), message.text)
         print(message.text, state.get_menu(uid))
         await next_func(bot, message, state, uid)
