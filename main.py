@@ -1,14 +1,16 @@
 import asyncio
 import os
 
+
 from dotenv import load_dotenv
+load_dotenv("./.env/all.env")
 from telebot.async_telebot import AsyncTeleBot
 
 import menu
 from state import UserStateMenu
 from submenus.training import training_handler
 
-load_dotenv("./.env/all.env")
+
 
 bot = AsyncTeleBot(os.getenv("TOKEN"))
 state = UserStateMenu()
@@ -17,7 +19,7 @@ state = UserStateMenu()
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
 async def send_welcome(message):
-    if message.from_user.username != 'AKhorn':
+    if message.from_user.username != os.getenv("MY_NAME"):
         await bot.send_message(message.from_user.id, "Вас приветствует личный бот.\
 К сожалению, работать с Вами он не будет. И вообще, Вы кто такие? Я вас не звал! Идите на х*й!")
     state.push_menu(message.from_user.id, menu.main_menu.name)
@@ -28,7 +30,7 @@ async def send_welcome(message):
 # Handle all other messages with content_type 'text' (content_types defaults to ['text'])
 @bot.message_handler(func=lambda message: True)
 async def echo_message(message):
-    if message.from_user.username != 'AKhorn':
+    if message.from_user.username != os.getenv("MY_NAME"):
         await bot.send_message(message.from_user.id, "Вы кто такие? Я вас не звал! Идите на х*й!")
         return
     # print(state.queue)

@@ -5,10 +5,12 @@ import json
 import data
 import menu
 
+headers = {'content-type': "application/json",
+                   "Authorization": f"Bearer {os.getenv('TOKEN_BACKEND')}"}
+
 async def get_last_value(name_training, name_exercise):
     async with aiohttp.ClientSession() as session:
         url = os.getenv("BACKEND_URL") + f"training/{name_training}/{name_exercise}"
-        headers = {'content-type': "application/json"}
 
         async with session.get(url, headers=headers) as response:
             text = await response.text()
@@ -19,7 +21,6 @@ async def get_last_value(name_training, name_exercise):
 async def start_training(name, weight):
     async with aiohttp.ClientSession() as session:
         url = os.getenv("BACKEND_URL") + "training/create"
-        headers = {'content-type': "application/json"}
         data = {"weight": weight,
                 "name_training": name}
         async with session.post(url, data=json.dumps(data), headers=headers) as response:
@@ -30,7 +31,6 @@ async def start_training(name, weight):
 async def write_exercise(name_training, name_exercise, value):
     async with aiohttp.ClientSession() as session:
         url = os.getenv("BACKEND_URL") + "training/write_exercise"
-        headers = {'content-type': "application/json"}
         data = {  "name_training": name_training,
               "name_exercise": name_exercise,
               "value": value}
