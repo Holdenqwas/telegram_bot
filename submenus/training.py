@@ -2,8 +2,8 @@ import aiohttp
 import os
 import json
 
-import data
-import menu
+import app.keyboards.data as data
+import app.keyboards.constructor as constructor
 
 headers = {'content-type': "application/json",
                    "Authorization": f"Bearer {os.getenv('TOKEN_BACKEND')}"}
@@ -42,7 +42,7 @@ async def write_exercise(name_training, name_exercise, value):
 async def next_func(bot, message, state, uid):
     cur_menu_name = state.get_menu(uid)
     parent_menu_name = state.back_menu(uid)
-    parent_menu = getattr(menu, parent_menu_name)
+    parent_menu = getattr(constructor, parent_menu_name)
     index = parent_menu.items.index(cur_menu_name) + 1
     if index < len(parent_menu.items):
         next_menu_name = parent_menu.items[index]
@@ -58,7 +58,7 @@ async def next_func(bot, message, state, uid):
         await bot.send_message(message.from_user.id, next_menu_name + prev_value)
     else:
         parent_menu_name = state.back_menu(uid)
-        parent_menu = getattr(menu, parent_menu_name)
+        parent_menu = getattr(constructor, parent_menu_name)
         await bot.send_message(message.from_user.id, parent_menu.title,
                                reply_markup=parent_menu.markup)
 
@@ -67,20 +67,20 @@ async def training_handler(bot, message, state):
     uid = message.from_user.id
 
     if message.text == "Грудь":
-        state.push_menu(uid, menu.train_breast_menu.name)
+        state.push_menu(uid, constructor.train_breast_menu.name)
         await bot.send_message(message.from_user.id,
-                               menu.train_breast_menu.title,
-                               reply_markup=menu.train_breast_menu.markup)
+                               constructor.train_breast_menu.title,
+                               reply_markup=constructor.train_breast_menu.markup)
     elif message.text == "Спина":
-        state.push_menu(uid, menu.train_beak_menu.name)
+        state.push_menu(uid, constructor.train_beak_menu.name)
         await bot.send_message(message.from_user.id,
-                               menu.train_beak_menu.title,
-                               reply_markup=menu.train_beak_menu.markup)
+                               constructor.train_beak_menu.title,
+                               reply_markup=constructor.train_beak_menu.markup)
     elif message.text == "Ноги":
-        state.push_menu(uid, menu.train_leg_menu.name)
+        state.push_menu(uid, constructor.train_leg_menu.name)
         await bot.send_message(message.from_user.id,
-                               menu.train_leg_menu.title,
-                               reply_markup=menu.train_leg_menu.markup)
+                               constructor.train_leg_menu.title,
+                               reply_markup=constructor.train_leg_menu.markup)
     elif message.text == "Дальше":
         await next_func(bot, message, state, uid)
 
@@ -95,7 +95,7 @@ async def training_handler(bot, message, state):
             prev_value += f" - {val}"
         await bot.send_message(message.from_user.id,
                                message.text + prev_value,
-                               reply_markup=menu.train_exercise_menu.markup)
+                               reply_markup=constructor.train_exercise_menu.markup)
     else:
         if state.get_menu(uid) == "Вес":
             await start_training(state.get_menu(uid, 2), message.text)

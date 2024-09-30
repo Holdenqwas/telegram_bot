@@ -1,6 +1,9 @@
 from collections import defaultdict
 
+from app.utils.decorators import singleton
 
+
+@singleton
 class UserStateMenu:
     def __init__(self):
         self.queue = defaultdict(list)
