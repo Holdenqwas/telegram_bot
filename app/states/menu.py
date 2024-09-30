@@ -8,6 +8,12 @@ class UserStateMenu:
     def __init__(self):
         self.queue = defaultdict(list)
 
+    def __repr__(self):
+        print("{")
+        for k, v in self.queue.items():
+            print("\t", k, "=", v)
+        print("}")
+
     def push_menu(self, user_id: str, name_menu: str):
         self.queue[user_id].append(name_menu)
 

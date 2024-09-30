@@ -18,22 +18,35 @@ state = UserStateMenu()
 
 bot = AsyncTeleBot(os.getenv("TOKEN"))
 
+
 def register_handlers():
-    bot.register_message_handler(admin_user, commands=['my'], admin=True, pass_bot=True)
-    bot.register_message_handler(user.start_menu, commands=['start'], pass_bot=True)
-    bot.register_message_handler(user.help_menu, commands=['help'], pass_bot=True)
-    bot.register_message_handler(user.author_menu, commands=['author'], pass_bot=True)
+    bot.register_message_handler(
+        admin_user, commands=["my"], admin=True, pass_bot=True
+    )
+    bot.register_message_handler(
+        user.start_menu, commands=["start"], pass_bot=True
+    )
+    bot.register_message_handler(
+        user.help_menu, commands=["help"], pass_bot=True
+    )
+    bot.register_message_handler(
+        user.author_menu, commands=["author"], pass_bot=True
+    )
     bot.register_message_handler(user.main_menu, main_menu=True, pass_bot=True)
-    bot.register_message_handler(user.train, func=lambda message: True, menu=True, pass_bot=True)
+    bot.register_message_handler(
+        user.train_menu, train_menu=True, pass_bot=True
+    )
 
 register_handlers()
 
 # Middlewares
-bot.setup_middleware(AntiFloodMiddleware(limit=4, bot=bot))
+bot.setup_middleware(AntiFloodMiddleware(limit=1, bot=bot))
 
 # custom filters
 bot.add_custom_filter(AdminFilter())
 bot.add_custom_filter(menu_filter.MainMenuFilter())
+bot.add_custom_filter(menu_filter.TrainMenuFilter())
+
 
 async def run():
     print("Bot started...")

@@ -16,4 +16,4 @@ class TrainMenuFilter(SimpleCustomFilter):
     key = "train_menu"
 
     async def check(self, message):
-        return state.get_menu(message.from_user.username) == "train_menu"
+        return state.check_category(message.from_user.username, "train_menu")
