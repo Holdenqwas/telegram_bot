@@ -50,27 +50,51 @@ async def get_name_exercises(name: str, name_train: str):
     async with aiohttp.ClientSession() as session:
         url = os.getenv("BACKEND_URL") + "training/name_exercises"
         data = {"user_name": name, "name_training": name_train}
-        async with session.patch(
+        async with session.post(
             url, data=json.dumps(data), headers=headers
         ) as response:
             return response.status, await response.json()
-        
+
 
 async def start_train(name: str, name_train: str):
     async with aiohttp.ClientSession() as session:
         url = os.getenv("BACKEND_URL") + "training/create_train"
         data = {"user_name": name, "name_training": name_train}
-        async with session.patch(
+        async with session.post(
             url, data=json.dumps(data), headers=headers
         ) as response:
             return response.status
 
 
-async def get_last_value(name_training, name_exercise):
+async def get_last_value(name: str, name_training, name_exercise):
     async with aiohttp.ClientSession() as session:
-        url = os.getenv("BACKEND_URL") + f"training/{name_training}/{name_exercise}"
+        url = os.getenv("BACKEND_URL") + f"exercise/last_exercise"
+        data = {
+            "user_name": name,
+            "name_training": name_training,
+            "name_exercise": name_exercise,
+        }
+        async with session.post(
+            url, data=json.dumps(data), headers=headers
+        ) as response:
+            text = await response.text()
+            print("Status:", response.status, "Body:", text)
+            return text
 
-        async with session.get(url, headers=headers) as response:
+
+
+async def write_exercise(name: str, name_training, name_exercise, value):
+    async with aiohttp.ClientSession() as session:
+        url = os.getenv("BACKEND_URL") + f"exercise/write_exercise"
+        data = {
+            "user_name": name,
+            "name_training": name_training,
+            "name_exercise": name_exercise,
+            "value": value
+        }
+        async with session.post(
+            url, data=json.dumps(data), headers=headers
+        ) as response:
             text = await response.text()
             print("Status:", response.status, "Body:", text)
             return text

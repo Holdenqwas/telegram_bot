@@ -2,11 +2,14 @@ from collections import defaultdict
 
 from app.utils.decorators import singleton
 
+def create_dict():
+    return {"menu": []}
+
 
 @singleton
 class UserStateMenu:
     def __init__(self):
-        self.mem = defaultdict({"menu": []})
+        self.mem = defaultdict(create_dict)
 
     def __repr__(self):
         print("{")
@@ -15,7 +18,7 @@ class UserStateMenu:
         print("}")
 
     def clear_mem(self, user_id):
-        self.mem[user_id] = {"menu": []}
+        self.mem[user_id] = {"menu": ["main_menu"]}
 
     def push_menu(self, user_id: str, name_menu: str):
         self.mem[user_id]["menu"].append(name_menu)

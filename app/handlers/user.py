@@ -43,7 +43,7 @@ async def main_menu(message: Message, bot: AsyncTeleBot):
 
 async def train_menu(message: Message, bot: AsyncTeleBot):
     username = message.from_user.username
-    print(state.queue)
+    print(state.mem)
     if message.text == "Назад":
         cur_menu = getattr(menu, state.back_menu(username))
         await bot.send_message(
@@ -206,7 +206,8 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
         )
         return
     elif state.get_menu(username) == "Выбор тренировки":
-        if message in state.get_cookie(username, "name_trains"):
+        if message.text in state.get_cookie(username, "name_trains"):
+            state.back_menu(username)
             await bot.send_message(
                 message.chat.id,
                 f"Начинаем тренировку {message.text}",
@@ -220,26 +221,82 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                         message.chat.id,
                         "Для тренировки не создано ни одного упражнения",
                     )
-                    state.back_menu(username)
                     await bot.send_message(
                         message.chat.id,
                         menu.setup_train_menu.title,
                         reply_markup=menu.setup_train_menu.markup,
                     )
                     return
+
+                state.push_menu(username, "Идет тренировка")
+                state.set_cookie(username, "cur_train", message.text)
                 state.set_cookie(
                     username, "name_exercises", data["name_exercises"]
                 )
                 status = await train.start_train(username, message.text)
-                # TODO здесь
+                if status == 200:
+                    state.set_cookie(
+                        username, "name_exercises", data["name_exercises"]
+                    )
+                    last_value = await train.get_last_value(
+                        username, message.text, data["name_exercises"][0]
+                    )
+                    await bot.send_message(
+                        message.chat.id,
+                        f"{data['name_exercises'][0]}: {last_value}",
+                        reply_markup=menu.back_menu.markup,
+                    )
+                    return
+                else:
+                    await bot.send_message(
+                        message.chat.id, "Что-то пошло не так, попробуй снова"
+                    )
+                    return
+
             else:
                 await bot.send_message(
                     message.chat.id, "Что-то пошло не так, попробуй снова"
                 )
                 return
-        await bot.send_message(
-            message.chat.id,
-            "Нельзя сейчас ничего писать, нужно выбрать тренировку \
+        else:
+            await bot.send_message(
+                message.chat.id,
+                "Нельзя сейчас ничего писать, нужно выбрать тренировку \
 из списка снизу, либо изменить названия тренировок в настройках",
-        )
+            )
+
+    elif state.get_menu(username) == "Идет тренировка":
+        try:
+            value = float(message.text)
+        except ValueError:
+            await bot.send_message(
+                message.chat.id,
+                "Новое значение упражнения должно быть целым или числом с \
+точкой. Например 99 или 99.5 Отправь сообщение заново",
+            )
+            return
+
+        all_exers = state.get_cookie(username, "name_exercises")
+        cur_train = state.get_cookie(username, "cur_train")
+        await train.write_exercise(username, cur_train, all_exers[0], value)
+        all_exers.pop(0)
+        if all_exers:
+            last_value = await train.get_last_value(
+                username, cur_train, all_exers[0]
+            )
+            await bot.send_message(
+                message.chat.id,
+                f"{all_exers[0]}: {last_value}",
+                reply_markup=menu.back_menu.markup,
+            )
+            state.set_cookie(username, "name_exercises", all_exers)
+            return
+        else:
+            state.clear_mem(username)
+            await bot.send_message(
+                message.chat.id,
+                "Тренировка завершена",
+                reply_markup=menu.main_menu.markup,
+            )
+            return
     await bot.send_message(message.chat.id, "train")

@@ -8,9 +8,9 @@ import app.keyboards.constructor as constructor
 headers = {'content-type': "application/json",
                    "Authorization": f"Bearer {os.getenv('TOKEN_BACKEND')}"}
 
-async def get_last_value(name_training, name_exercise):
+async def get_last_value(name, name_training, name_exercise):
     async with aiohttp.ClientSession() as session:
-        url = os.getenv("BACKEND_URL") + f"training/{name_training}/{name_exercise}"
+        url = os.getenv("BACKEND_URL") + f"exercise/{name}/{name_training}/{name_exercise}"
 
         async with session.get(url, headers=headers) as response:
             text = await response.text()
