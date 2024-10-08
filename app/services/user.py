@@ -20,5 +20,4 @@ async def create_user(username: str):
             url, data=json.dumps(data), headers=headers
         ) as response:
             html = await response.text()
-            print("users/create", "Status:", response.status, "Body:", html)
             return response

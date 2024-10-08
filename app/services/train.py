@@ -39,12 +39,31 @@ async def update_name_trainings(name: str, names: str):
             return response.status
 
 
+async def update_name_exercises(username: str, name_train: str, name_exers: str):
+    async with aiohttp.ClientSession() as session:
+        url = os.getenv("BACKEND_URL") + "users/update_name_exercises"
+        data = {"user_name": username, "name_train": name_train, "names": name_exers}
+        async with session.patch(
+            url, data=json.dumps(data), headers=headers
+        ) as response:
+            return response.status
+        
+
 async def delete_training(name: str):
     async with aiohttp.ClientSession() as session:
         url = f"{os.getenv('BACKEND_URL')}users/delete_trainings/{name}"
         async with session.delete(url, headers=headers) as response:
             return response.status
 
+
+async def get_name_trainings(name: str):
+    async with aiohttp.ClientSession() as session:
+        url = os.getenv("BACKEND_URL") + f"training/name_trainings/{name}"
+        async with session.get(
+            url, headers=headers
+        ) as response:
+            return response.status, await response.json()
+        
 
 async def get_name_exercises(name: str, name_train: str):
     async with aiohttp.ClientSession() as session:
@@ -78,7 +97,6 @@ async def get_last_value(name: str, name_training, name_exercise):
             url, data=json.dumps(data), headers=headers
         ) as response:
             text = await response.text()
-            print("Status:", response.status, "Body:", text)
             return text
 
 
@@ -96,5 +114,4 @@ async def write_exercise(name: str, name_training, name_exercise, value):
             url, data=json.dumps(data), headers=headers
         ) as response:
             text = await response.text()
-            print("Status:", response.status, "Body:", text)
             return text
