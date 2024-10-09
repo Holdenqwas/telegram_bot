@@ -17,3 +17,10 @@ class TrainMenuFilter(SimpleCustomFilter):
 
     async def check(self, message):
         return state.check_category(message.from_user.username, "train_menu")
+    
+
+class FoodMenuFilter(SimpleCustomFilter):
+    key = "food_menu"
+
+    async def check(self, message):
+        return state.check_category(message.from_user.username, "food_menu")

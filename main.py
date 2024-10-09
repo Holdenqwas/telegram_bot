@@ -21,7 +21,7 @@ bot = AsyncTeleBot(os.getenv("TOKEN"))
 
 def register_handlers():
     bot.register_message_handler(
-        admin_user, commands=["my"], admin=True, pass_bot=True
+        admin_user, commands=["test"], admin=True, pass_bot=True
     )
     bot.register_message_handler(
         user.start_menu, commands=["start"], pass_bot=True
@@ -31,6 +31,9 @@ def register_handlers():
     )
     bot.register_message_handler(
         user.author_menu, commands=["author"], pass_bot=True
+    )
+    bot.register_message_handler(
+        user.get_main_menu, commands=["main"], pass_bot=True
     )
     bot.register_message_handler(user.main_menu, main_menu=True, pass_bot=True)
     bot.register_message_handler(
