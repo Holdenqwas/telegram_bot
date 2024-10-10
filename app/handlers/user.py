@@ -69,7 +69,7 @@ async def help_menu(message: Message, bot: AsyncTeleBot):
 
 async def author_menu(message: Message, bot: AsyncTeleBot):
     await bot.send_message(message.chat.id, 
-                           """О мне
+                           """Обо мне
 
 Я - Антон, создатель этого бота для разного.
 
