@@ -8,7 +8,7 @@ from telebot.async_telebot import AsyncTeleBot
 
 from app.states.menu import UserStateMenu
 from app.handlers.admin import admin_user
-from app.handlers import user
+from app.handlers import user, train, shop
 from app.filters.admin_filter import AdminFilter
 from app.filters import menu_filter
 from app.middlewares.antiflood_middleware import AntiFloodMiddleware
@@ -37,7 +37,10 @@ def register_handlers():
     )
     bot.register_message_handler(user.main_menu, main_menu=True, pass_bot=True)
     bot.register_message_handler(
-        user.train_menu, train_menu=True, pass_bot=True
+        train.train_menu, train_menu=True, pass_bot=True
+    )
+    bot.register_message_handler(
+        shop.shop_menu, shop_menu=True, pass_bot=True
     )
 
 register_handlers()
@@ -49,6 +52,7 @@ bot.setup_middleware(AntiFloodMiddleware(limit=1, bot=bot))
 bot.add_custom_filter(AdminFilter())
 bot.add_custom_filter(menu_filter.MainMenuFilter())
 bot.add_custom_filter(menu_filter.TrainMenuFilter())
+bot.add_custom_filter(menu_filter.ShopMenuFilter())
 
 
 async def run():

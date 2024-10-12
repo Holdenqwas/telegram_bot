@@ -9,3 +9,5 @@ train_menu = Menu("train_menu", "Тренировка", data.train_menu)
 setup_train_menu = Menu(
     "setup_train_menu", "Настройка тренировок", data.setup_train_menu
 )
+
+shop_menu = Menu("shop_menu", "Списки покупок", data.shop_menu)
