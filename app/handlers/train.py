@@ -9,16 +9,16 @@ state = UserStateMenu()
 
 
 async def train_menu(message: Message, bot: AsyncTeleBot):
-    username = message.from_user.username
+    user_id = message.from_user.id
     # print(state.mem)
     if message.text == "Назад":
-        cur_menu = getattr(menu, state.back_menu(username))
+        cur_menu = getattr(menu, state.back_menu(user_id))
         await bot.send_message(
             message.chat.id, cur_menu.title, reply_markup=cur_menu.markup
         )
         return
     elif message.text == "Начать тренировку":
-        state.push_menu(username, "Начать тренировку")
+        state.push_menu(user_id, "Начать тренировку")
         await bot.send_message(
             message.chat.id,
             "Введи свой вес",
@@ -26,7 +26,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
         )
         return
     elif message.text == menu.setup_train_menu.title:
-        state.push_menu(username, menu.setup_train_menu.title)
+        state.push_menu(user_id, menu.setup_train_menu.title)
         await bot.send_message(
             message.chat.id,
             menu.setup_train_menu.title,
@@ -34,7 +34,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
         )
         return
 
-    if state.get_menu(username) == "Начать тренировку":
+    if state.get_menu(user_id) == "Начать тренировку":
         try:
             weight = float(message.text)
         except ValueError:
@@ -44,7 +44,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
 (83 или 83.45). Введи свой вес",
             )
             return
-        status, data = await train.create_all_training(username, weight)
+        status, data = await train.create_all_training(user_id, weight)
         if status != 200:
             await bot.send_message(
                 message.chat.id,
@@ -53,8 +53,8 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
             return
 
         if "name_trains" in data and not data["name_trains"]:
-            state.back_menu(username)
-            state.push_menu(username, menu.setup_train_menu.title)
+            state.back_menu(user_id)
+            state.push_menu(user_id, menu.setup_train_menu.title)
             await bot.send_message(
                 message.chat.id,
                 "Нет ни одной тренировки, сперва их нужно создать",
@@ -62,21 +62,21 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
             )
             return
 
-        state.back_menu(username)
-        state.push_menu(username, "Выбор тренировки")
+        state.back_menu(user_id)
+        state.push_menu(user_id, "Выбор тренировки")
         cur_menu = menu.Menu(
             "train_in_process", "Выберете свою тренировку", data["name_trains"]
         )
-        state.set_cookie(username, "name_trains", data["name_trains"])
+        state.set_cookie(user_id, "name_trains", data["name_trains"])
         await bot.send_message(
             message.chat.id,
             cur_menu.title,
             reply_markup=cur_menu.markup,
         )
         return
-    elif state.get_menu(username) == menu.setup_train_menu.title:
+    elif state.get_menu(user_id) == menu.setup_train_menu.title:
         if message.text == "Создать тренировки":
-            state.push_menu(username, "Создать тренировки")
+            state.push_menu(user_id, "Создать тренировки")
             await bot.send_message(
                 message.chat.id,
                 "Введите названия не более 5 тренерировок через запятую. \
@@ -84,7 +84,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
             )
             return
         elif message.text == "Сменить названия тренировкам":
-            state.push_menu(username, "Сменить названия тренировкам")
+            state.push_menu(user_id, "Сменить названия тренировкам")
             await bot.send_message(
                 message.chat.id,
                 "Введите названия не более 5 тренерировок через запятую. \
@@ -92,7 +92,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
             )
             return
         elif message.text == "Удалить тренировки":
-            state.push_menu(username, "Удалить тренировки")
+            state.push_menu(user_id, "Удалить тренировки")
             await bot.send_message(
                 message.chat.id,
                 "Вы собираетесь полностью удалить все тренировки. \
@@ -100,7 +100,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
             )
             return
         elif message.text == "Названия упражнений":
-            status, data = await train.get_name_trainings(username)
+            status, data = await train.get_name_trainings(user_id)
             if status != 200:
                 await bot.send_message(
                     message.chat.id,
@@ -116,15 +116,15 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                 )
                 return
 
-            state.back_menu(username)
-            state.push_menu(username, "Названия упражнений")
+            state.back_menu(user_id)
+            state.push_menu(user_id, "Названия упражнений")
             cur_menu = menu.Menu(
                 "set_name_exers",
                 "Выбери тренировку, для которой нужно создать/сменить названия \
 упражнений",
                 data["name_trains"],
             )
-            state.set_cookie(username, "name_trains", data["name_trains"])
+            state.set_cookie(user_id, "name_trains", data["name_trains"])
             await bot.send_message(
                 message.chat.id,
                 cur_menu.title,
@@ -132,8 +132,8 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
             )
             return
 
-    elif state.get_menu(username) == "Создать тренировки":
-        status = await train.create_trainings(username, message.text)
+    elif state.get_menu(user_id) == "Создать тренировки":
+        status = await train.create_trainings(user_id, message.text)
         if status != 200:
             await bot.send_message(
                 message.chat.id,
@@ -147,7 +147,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                 message.chat.id,
                 "Отлично, тренировки созданы",
             )
-        state.back_menu(username)
+        state.back_menu(user_id)
         await bot.send_message(
             message.chat.id,
             menu.setup_train_menu.title,
@@ -155,8 +155,8 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
         )
         return
 
-    elif state.get_menu(username) == "Сменить названия тренировок":
-        status = await train.update_name_trainings(username, message.text)
+    elif state.get_menu(user_id) == "Сменить названия тренировок":
+        status = await train.update_name_trainings(user_id, message.text)
         if status != 200:
             await bot.send_message(
                 message.chat.id,
@@ -170,7 +170,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                 message.chat.id,
                 "Отлично, тренировки обновлены",
             )
-        state.back_menu(username)
+        state.back_menu(user_id)
         await bot.send_message(
             message.chat.id,
             menu.setup_train_menu.title,
@@ -178,10 +178,10 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
         )
         return
 
-    elif state.get_menu(username) == "Удалить тренировки":
+    elif state.get_menu(user_id) == "Удалить тренировки":
         if message.text == "Удалить все тренировки":
             # TODO дать выбор какую тренировку удалить
-            status = await train.delete_training(username)
+            status = await train.delete_training(user_id)
             if status != 200:
                 await bot.send_message(
                     message.chat.id,
@@ -193,7 +193,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                     message.chat.id,
                     "Отлично, тренировки удалены",
                 )
-            state.back_menu(username)
+            state.back_menu(user_id)
             await bot.send_message(
                 message.chat.id,
                 menu.setup_train_menu.title,
@@ -207,9 +207,9 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
         )
         return
     
-    elif state.get_menu(username) == "Названия упражнений":
-        if message.text in state.get_cookie(username, "name_trains"):
-            state.set_cookie(username, "set_for_train", message.text)
+    elif state.get_menu(user_id) == "Названия упражнений":
+        if message.text in state.get_cookie(user_id, "name_trains"):
+            state.set_cookie(user_id, "set_for_train", message.text)
             await bot.send_message(
                 message.chat.id,
                 "Введи названия не более 10 упражнений через запятую. \
@@ -218,9 +218,9 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
             )
             return
         else:
-            name_train = state.get_cookie(username, "set_for_train")
+            name_train = state.get_cookie(user_id, "set_for_train")
             if name_train:
-                status = await train.update_name_exercises(username, name_train, message.text)
+                status = await train.update_name_exercises(user_id, name_train, message.text)
                 if status != 200:
                     await bot.send_message(
                         message.chat.id,
@@ -230,7 +230,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                     )
                     return
                 else:
-                    state.clear_mem(username)
+                    state.clear_mem(user_id)
                     await bot.send_message(
                         message.chat.id,
                         "Отлично, упражнения обновлены",
@@ -245,15 +245,15 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
             return
                 
     
-    elif state.get_menu(username) == "Выбор тренировки":
-        if message.text in state.get_cookie(username, "name_trains"):
-            state.back_menu(username)
+    elif state.get_menu(user_id) == "Выбор тренировки":
+        if message.text in state.get_cookie(user_id, "name_trains"):
+            state.back_menu(user_id)
             await bot.send_message(
                 message.chat.id,
                 f"Начинаем тренировку {message.text}",
             )
             status, data = await train.get_name_exercises(
-                username, message.text
+                user_id, message.text
             )
             if status == 200:
                 if not data["name_exercises"]:
@@ -268,18 +268,18 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                     )
                     return
 
-                state.push_menu(username, "Идет тренировка")
-                state.set_cookie(username, "cur_train", message.text)
+                state.push_menu(user_id, "Идет тренировка")
+                state.set_cookie(user_id, "cur_train", message.text)
                 state.set_cookie(
-                    username, "name_exercises", data["name_exercises"]
+                    user_id, "name_exercises", data["name_exercises"]
                 )
-                status = await train.start_train(username, message.text)
+                status = await train.start_train(user_id, message.text)
                 if status == 200:
                     state.set_cookie(
-                        username, "name_exercises", data["name_exercises"]
+                        user_id, "name_exercises", data["name_exercises"]
                     )
                     last_value = await train.get_last_value(
-                        username, message.text, data["name_exercises"][0]
+                        user_id, message.text, data["name_exercises"][0]
                     )
                     await bot.send_message(
                         message.chat.id,
@@ -305,7 +305,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
 из списка снизу, либо изменить названия тренировок в настройках",
             )
 
-    elif state.get_menu(username) == "Идет тренировка":
+    elif state.get_menu(user_id) == "Идет тренировка":
         try:
             value = float(message.text)
         except ValueError:
@@ -316,23 +316,23 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
             )
             return
 
-        all_exers = state.get_cookie(username, "name_exercises")
-        cur_train = state.get_cookie(username, "cur_train")
-        await train.write_exercise(username, cur_train, all_exers[0], value)
+        all_exers = state.get_cookie(user_id, "name_exercises")
+        cur_train = state.get_cookie(user_id, "cur_train")
+        await train.write_exercise(user_id, cur_train, all_exers[0], value)
         all_exers.pop(0)
         if all_exers:
             last_value = await train.get_last_value(
-                username, cur_train, all_exers[0]
+                user_id, cur_train, all_exers[0]
             )
             await bot.send_message(
                 message.chat.id,
                 f"{all_exers[0]}: {last_value}",
                 reply_markup=menu.back_menu.markup,
             )
-            state.set_cookie(username, "name_exercises", all_exers)
+            state.set_cookie(user_id, "name_exercises", all_exers)
             return
         else:
-            state.clear_mem(username)
+            state.clear_mem(user_id)
             await bot.send_message(
                 message.chat.id,
                 "Тренировка завершена",

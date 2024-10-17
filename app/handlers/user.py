@@ -9,7 +9,7 @@ state = UserStateMenu()
 
 
 async def start_menu(message: Message, bot: AsyncTeleBot):
-    await user.create_user(message.from_user.username)
+    await user.create_user(message.from_user.id, message.from_user.username)
     await bot.send_message(
         message.chat.id,
         "Вас приветствует личный бот помощник! Чтобы получить помощь воспользуйтейсь командой /help",
@@ -120,7 +120,7 @@ Changelog:
 
 
 async def get_main_menu(message: Message, bot: AsyncTeleBot):
-        state.clear_mem(message.from_user.username)
+        state.clear_mem(message.from_user.id)
         await bot.send_message(
             message.chat.id,
             "Главное меню",
@@ -131,7 +131,7 @@ async def get_main_menu(message: Message, bot: AsyncTeleBot):
 
 async def main_menu(message: Message, bot: AsyncTeleBot):
     if message.text == "Тренировка":
-        state.push_menu(message.from_user.username, menu.train_menu.name)
+        state.push_menu(message.from_user.id, menu.train_menu.name)
         await bot.send_message(
             message.chat.id,
             menu.train_menu.title,
@@ -139,7 +139,7 @@ async def main_menu(message: Message, bot: AsyncTeleBot):
         )
         return
     elif message.text == "Покупки":
-        state.push_menu(message.from_user.username, menu.shop_menu.name)
+        state.push_menu(message.from_user.id, menu.shop_menu.name)
         await bot.send_message(
             message.chat.id,
             menu.shop_menu.title,
