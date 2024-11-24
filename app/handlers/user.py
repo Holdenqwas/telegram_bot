@@ -20,7 +20,7 @@ async def start_menu(message: Message, bot: AsyncTeleBot):
 async def help_menu(message: Message, bot: AsyncTeleBot):
     await bot.send_message(
         message.chat.id,
-        """Бот помошник в Telegram: Инструкция
+        """Бот помощник в Telegram: Инструкция
 
 Здесь ты найдешь все, что необходимо мне для комфортной жизни и многое другое.
 
