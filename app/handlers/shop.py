@@ -371,7 +371,7 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
             f"Если вы еще не привязали аккаунт к Яндекс \
 станции, введите следущие цифры в окно для аутентификации в навыке Алисы\n\n\
 Первое число: {first_num[:3]}-{first_num[3:6]}-{first_num[6:]}\n\
-Второе число: {second_num[:2]}-{second_num[2:]}\n",
+Второе число: {second_num[:3]}-{second_num[3:]}\n",
             reply_markup=menu.shop_menu.markup,
         )
         await bot.send_message(
@@ -387,5 +387,5 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
         return
 
     await bot.send_message(
-        message.chat.id, "Что-то пошло не так, команда не оьработана"
+        message.chat.id, "Что-то пошло не так, команда не обработана"
     )
