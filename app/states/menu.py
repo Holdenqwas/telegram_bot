@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from app.utils.decorators import singleton
 
+
 def create_dict():
     return {"menu": []}
 

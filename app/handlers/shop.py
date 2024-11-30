@@ -8,6 +8,7 @@ from app.services import shop as service
 state = UserStateMenu()
 MARKER_TO_DELETE = "ㅤ"
 
+
 async def shop_menu(message: Message, bot: AsyncTeleBot):
     user_id = message.from_user.id
     if message.text == "Назад":
@@ -127,19 +128,20 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
         state.back_menu(user_id)
         state.push_menu(user_id, "Открыт список")
         state.set_cookie(user_id, "name_shop_list", message.text)
-        
+
         if "items" in data and not data["items"]:
             await bot.send_message(
                 message.chat.id,
-                f"Список с покупками пустой.\nПоследний раз обновлялся {data['update_time']}\n\n\
-Чтобы добавить элементы в список, отправь их в сообщении, каждый эелемент с новой строки. Например:\n\n\
+                f"Список с покупками пустой.\nПоследний раз обновлялся \
+{data['update_time']}\n\n\
+Чтобы добавить элементы в список, отправь их в сообщении, каждый эелемент \
+с новой строки. Например:\n\n\
 молоко\n\
 яйца\n\
 хлеб",
                 reply_markup=menu.back_menu.markup,
             )
             return
-
 
         items = [item + MARKER_TO_DELETE for item in data["items"]]
         cur_menu = menu.Menu(
@@ -179,7 +181,8 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
         if status != 200:
             await bot.send_message(
                 message.chat.id,
-                "Что-то пошло не так, попробуй снова отправить ID списка, либо позже",
+                "Что-то пошло не так, попробуй снова отправить ID списка, \
+либо позже",
             )
             return
 
@@ -196,14 +199,16 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
         if status != 200:
             await bot.send_message(
                 message.chat.id,
-                "Что-то пошло не так, попробуй снова отправить ID списка, либо позже",
+                "Что-то пошло не так, попробуй снова отправить ID списка, \
+либо позже",
             )
             return
 
         state.back_menu(user_id)
         await bot.send_message(
             message.chat.id,
-            "Перешли следующее сообщение пользователю, с которым хочешь совместно вести список покупок.",
+            "Перешли следующее сообщение пользователю, с которым хочешь \
+совместно вести список покупок.",
             reply_markup=menu.shop_menu.markup,
         )
         await bot.send_message(
@@ -222,7 +227,8 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
         if status != 200:
             await bot.send_message(
                 message.chat.id,
-                "Что-то пошло не так, попробуй снова выбрать список, либо позже",
+                "Что-то пошло не так, попробуй снова выбрать список, \
+либо позже",
             )
             return
 
@@ -239,11 +245,14 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
 
         if message.text.endswith(MARKER_TO_DELETE):
             # Нудно удалить элемент
-            status, data = await service.del_item_from_shop_list(user_id, name_shop_list, message.text[:-len(MARKER_TO_DELETE)])
+            status, data = await service.del_item_from_shop_list(
+                user_id, name_shop_list, message.text[: -len(MARKER_TO_DELETE)]
+            )
             if status != 200:
                 await bot.send_message(
                     message.chat.id,
-                    "Что-то пошло не так при удалении из списка, попробуй снова, либо позже",
+                    "Что-то пошло не так при удалении из списка, попробуй \
+снова, либо позже",
                 )
                 return
 
@@ -251,7 +260,7 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
                 state.back_menu(user_id)
                 await bot.send_message(
                     message.chat.id,
-                    f"Список с покупками пустой.",
+                    "Список с покупками пустой.",
                     reply_markup=menu.shop_menu.markup,
                 )
                 return
@@ -263,7 +272,7 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
                 "Удален",
                 items,
             )
-            
+
             await bot.send_message(
                 message.chat.id,
                 cur_menu.title,
@@ -271,11 +280,14 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
             )
         else:
             # Нужно добавить в список
-            status, data = await service.add_items_to_shop_list(user_id, name_shop_list, message.text)
+            status, data = await service.add_items_to_shop_list(
+                user_id, name_shop_list, message.text
+            )
             if status != 200:
                 await bot.send_message(
                     message.chat.id,
-                    "Что-то пошло не так при добавление в список, попробуй снова, либо позже",
+                    "Что-то пошло не так при добавление в список, попробуй \
+снова, либо позже",
                 )
                 return
 
@@ -286,7 +298,7 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
                 "Элементы успешно добавлены",
                 items,
             )
-            
+
             await bot.send_message(
                 message.chat.id,
                 cur_menu.title,

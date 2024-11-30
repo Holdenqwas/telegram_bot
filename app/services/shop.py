@@ -37,7 +37,7 @@ async def create_shop_list(user_id: str, name_shop_list: str):
             url, data=json.dumps(data), headers=headers
         ) as response:
             return response.status, await response.json()
-     
+
 
 async def user_add_shop_list(user_id: str, uid: str):
     async with aiohttp.ClientSession() as session:
@@ -58,7 +58,7 @@ async def get_uid_shop_list(user_id: str, shop_list_name: str):
             headers=headers,
         ) as response:
             return response.status, await response.json()
-      
+
 
 async def delete_shop_list(user_id: str, shop_list_name: str):
     async with aiohttp.ClientSession() as session:
@@ -79,7 +79,7 @@ async def add_items_to_shop_list(user_id: str, shop_list_name: str, items: str):
             url, data=json.dumps(data), headers=headers
         ) as response:
             return response.status, await response.json()
-        
+
 
 async def del_item_from_shop_list(user_id: str, shop_list_name: str, item: str):
     async with aiohttp.ClientSession() as session:
