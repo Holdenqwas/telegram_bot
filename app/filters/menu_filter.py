@@ -17,7 +17,7 @@ class TrainMenuFilter(SimpleCustomFilter):
 
     async def check(self, message):
         return state.check_category(message.from_user.id, "train_menu")
-    
+
 
 class ShopMenuFilter(SimpleCustomFilter):
     key = "shop_menu"

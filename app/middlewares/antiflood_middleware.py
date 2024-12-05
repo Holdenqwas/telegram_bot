@@ -11,7 +11,7 @@ class AntiFloodMiddleware(BaseMiddleware):
         # Always specify update types, otherwise middlewares won't work
 
     async def pre_process(self, message, data):
-        if not message.from_user.id in self.last_time:
+        if not (message.from_user.id in self.last_time):
             # User is not in a dict, so lets add and cancel this function
             self.last_time[message.from_user.id] = message.date
             return
@@ -19,10 +19,10 @@ class AntiFloodMiddleware(BaseMiddleware):
             # User is flooding
             await self.bot.send_message(
                 message.chat.id,
-                "Пожалуйста, не отправляйте сообщения чаще, чем раз в 1 секунду. \
-Это необходимо для обеспечения стабильной работы нашего сервиса. \
-\nЕсли у вас есть вопросы или нужна помощь, не стесняйтесь обращаться к нам /author. \
-\n\nБлагодарим за понимание.",
+                "Пожалуйста, не отправляйте сообщения чаще, чем раз в \
+1 секунду. Это необходимо для обеспечения стабильной работы нашего сервиса. \
+\nЕсли у вас есть вопросы или нужна помощь, не стесняйтесь обращаться к нам \
+/author.\n\nБлагодарим за понимание.",
             )
             return CancelUpdate()
         # write the time of the last request

@@ -108,7 +108,9 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                 )
                 return
 
-            if "name_trains" not in data or ("name_trains" in data and not data["name_trains"]):
+            if "name_trains" not in data or (
+                "name_trains" in data and not data["name_trains"]
+            ):
                 await bot.send_message(
                     message.chat.id,
                     "Нет ни одной тренировки, сперва их нужно создать",
@@ -206,7 +208,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
 Удалить все тренировки",
         )
         return
-    
+
     elif state.get_menu(user_id) == "Названия упражнений":
         if message.text in state.get_cookie(user_id, "name_trains"):
             state.set_cookie(user_id, "set_for_train", message.text)
@@ -220,7 +222,9 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
         else:
             name_train = state.get_cookie(user_id, "set_for_train")
             if name_train:
-                status = await train.update_name_exercises(user_id, name_train, message.text)
+                status = await train.update_name_exercises(
+                    user_id, name_train, message.text
+                )
                 if status != 200:
                     await bot.send_message(
                         message.chat.id,
@@ -243,8 +247,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                 "Нужно выбрать название тренировки",
             )
             return
-                
-    
+
     elif state.get_menu(user_id) == "Выбор тренировки":
         if message.text in state.get_cookie(user_id, "name_trains"):
             state.back_menu(user_id)
@@ -252,9 +255,7 @@ async def train_menu(message: Message, bot: AsyncTeleBot):
                 message.chat.id,
                 f"Начинаем тренировку {message.text}",
             )
-            status, data = await train.get_name_exercises(
-                user_id, message.text
-            )
+            status, data = await train.get_name_exercises(user_id, message.text)
             if status == 200:
                 if not data["name_exercises"]:
                     await bot.send_message(

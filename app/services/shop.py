@@ -2,6 +2,8 @@ import aiohttp
 import os
 import json
 
+DEBUG = os.environ.get("DEBUG")
+verify_ssl = not DEBUG
 
 headers = {
     "content-type": "application/json",
@@ -13,7 +15,10 @@ async def get_names_shop_list(user_id: str):
     async with aiohttp.ClientSession() as session:
         url = os.getenv("BACKEND_URL") + "shop_list/get_names_shop_list"
         async with session.get(
-            url, params={"user_id": user_id}, headers=headers
+            url,
+            params={"user_id": user_id},
+            headers=headers,
+            verify_ssl=verify_ssl,
         ) as response:
             return response.status, await response.json()
 
@@ -25,6 +30,7 @@ async def get_shop_list(user_id: str, shop_list_name: str):
             url,
             params={"user_id": user_id, "name": shop_list_name},
             headers=headers,
+            verify_ssl=verify_ssl,
         ) as response:
             return response.status, await response.json()
 
@@ -34,17 +40,17 @@ async def create_shop_list(user_id: str, name_shop_list: str):
         url = os.getenv("BACKEND_URL") + "shop_list/create_shop_list"
         data = {"user_id": user_id, "name": name_shop_list}
         async with session.post(
-            url, data=json.dumps(data), headers=headers
+            url, data=json.dumps(data), headers=headers, verify_ssl=verify_ssl
         ) as response:
             return response.status, await response.json()
-     
+
 
 async def user_add_shop_list(user_id: str, uid: str):
     async with aiohttp.ClientSession() as session:
         url = os.getenv("BACKEND_URL") + "shop_list/user_add_shop_list"
         data = {"user_id": user_id, "uid": uid}
         async with session.post(
-            url, data=json.dumps(data), headers=headers
+            url, data=json.dumps(data), headers=headers, verify_ssl=verify_ssl
         ) as response:
             return response.status, await response.json()
 
@@ -56,9 +62,10 @@ async def get_uid_shop_list(user_id: str, shop_list_name: str):
             url,
             params={"user_id": user_id, "name": shop_list_name},
             headers=headers,
+            verify_ssl=verify_ssl,
         ) as response:
             return response.status, await response.json()
-      
+
 
 async def delete_shop_list(user_id: str, shop_list_name: str):
     async with aiohttp.ClientSession() as session:
@@ -67,6 +74,7 @@ async def delete_shop_list(user_id: str, shop_list_name: str):
             url,
             params={"user_id": user_id, "name": shop_list_name},
             headers=headers,
+            verify_ssl=verify_ssl,
         ) as response:
             return response.status, await response.json()
 
@@ -76,16 +84,28 @@ async def add_items_to_shop_list(user_id: str, shop_list_name: str, items: str):
         url = os.getenv("BACKEND_URL") + "shop_list/add_items_to_shop_list"
         data = {"user_id": user_id, "name": shop_list_name, "items": items}
         async with session.post(
-            url, data=json.dumps(data), headers=headers
+            url, data=json.dumps(data), headers=headers, verify_ssl=verify_ssl
         ) as response:
             return response.status, await response.json()
-        
+
 
 async def del_item_from_shop_list(user_id: str, shop_list_name: str, item: str):
     async with aiohttp.ClientSession() as session:
         url = os.getenv("BACKEND_URL") + "shop_list/del_item_from_shop_list"
         data = {"user_id": user_id, "name": shop_list_name, "item": item}
         async with session.delete(
-            url, params=data, headers=headers
+            url, params=data, headers=headers, verify_ssl=verify_ssl
+        ) as response:
+            return response.status, await response.json()
+
+
+async def connect_to_alice(user_id: str, shop_list_name: str):
+    async with aiohttp.ClientSession() as session:
+        url = os.getenv("BACKEND_URL") + "users/connect_to_alice"
+        async with session.get(
+            url,
+            params={"user_id": user_id, "shop_list_name": shop_list_name},
+            headers=headers,
+            verify_ssl=verify_ssl,
         ) as response:
             return response.status, await response.json()

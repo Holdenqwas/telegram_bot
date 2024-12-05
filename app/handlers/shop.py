@@ -1,3 +1,4 @@
+from datetime import datetime
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import Message
 
@@ -7,6 +8,7 @@ from app.services import shop as service
 
 state = UserStateMenu()
 MARKER_TO_DELETE = "ㅤ"
+
 
 async def shop_menu(message: Message, bot: AsyncTeleBot):
     user_id = message.from_user.id
@@ -113,6 +115,35 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
             reply_markup=cur_menu.markup,
         )
         return
+    elif message.text == "Связать список с Яндекс станцией":
+        status, data = await service.get_names_shop_list(user_id)
+        if status != 200:
+            await bot.send_message(
+                message.chat.id,
+                "Что-то пошло не так, попробуй снова",
+            )
+            return
+
+        if "names" in data and not data["names"]:
+            await bot.send_message(
+                message.chat.id,
+                "Нет ни одного списка, сперва их нужно создать или добавить",
+            )
+            return
+
+        state.push_menu(user_id, "Связать список с Яндекс станцией")
+        cur_menu = menu.Menu(
+            "Связать список с яндекс станцией",
+            "Выбери список, в который Яндекс станцию буджет по умолчанию \
+добавлять предметы",
+            data["names"],
+        )
+        await bot.send_message(
+            message.chat.id,
+            cur_menu.title,
+            reply_markup=cur_menu.markup,
+        )
+        return
 
     if state.get_menu(user_id) == "Открыть список":
         status, data = await service.get_shop_list(user_id, message.text)
@@ -127,12 +158,14 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
         state.back_menu(user_id)
         state.push_menu(user_id, "Открыт список")
         state.set_cookie(user_id, "name_shop_list", message.text)
-        
+
         if "items" in data and not data["items"]:
             await bot.send_message(
                 message.chat.id,
-                f"Список с покупками пустой.\nПоследний раз обновлялся {data['update_time']}\n\n\
-Чтобы добавить элементы в список, отправь их в сообщении, каждый эелемент с новой строки. Например:\n\n\
+                f"Список с покупками пустой.\nПоследний раз обновлялся \
+{data['update_time']}\n\n\
+Чтобы добавить элементы в список, отправь их в сообщении, каждый эелемент \
+с новой строки. Например:\n\n\
 молоко\n\
 яйца\n\
 хлеб",
@@ -140,11 +173,13 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
             )
             return
 
-
         items = [item + MARKER_TO_DELETE for item in data["items"]]
+        time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
+        last_time_update = datetime.strptime(data["update_time"], time_format)
+
         cur_menu = menu.Menu(
             "Открыт список",
-            f"Список на дату {data['update_time']}",
+            f"Список на дату {last_time_update.strftime('%H:%M:%S %d-%m-%Y')}",
             items,
         )
 
@@ -179,7 +214,8 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
         if status != 200:
             await bot.send_message(
                 message.chat.id,
-                "Что-то пошло не так, попробуй снова отправить ID списка, либо позже",
+                "Что-то пошло не так, попробуй снова отправить ID списка, \
+либо позже",
             )
             return
 
@@ -196,14 +232,16 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
         if status != 200:
             await bot.send_message(
                 message.chat.id,
-                "Что-то пошло не так, попробуй снова отправить ID списка, либо позже",
+                "Что-то пошло не так, попробуй снова отправить ID списка, \
+либо позже",
             )
             return
 
         state.back_menu(user_id)
         await bot.send_message(
             message.chat.id,
-            "Перешли следующее сообщение пользователю, с которым хочешь совместно вести список покупок.",
+            "Перешли следующее сообщение пользователю, с которым хочешь \
+совместно вести список покупок.",
             reply_markup=menu.shop_menu.markup,
         )
         await bot.send_message(
@@ -215,6 +253,11 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
 4. Готово, теперь вы можете вместе добавлять и удалять элементы от туда',
             reply_markup=menu.shop_menu.markup,
         )
+        await bot.send_message(
+            message.chat.id,
+            f"{data}",
+            reply_markup=menu.shop_menu.markup,
+        )
         return
     elif state.get_menu(user_id) == "Удалить":
         status, data = await service.delete_shop_list(user_id, message.text)
@@ -222,7 +265,8 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
         if status != 200:
             await bot.send_message(
                 message.chat.id,
-                "Что-то пошло не так, попробуй снова выбрать список, либо позже",
+                "Что-то пошло не так, попробуй снова выбрать список, \
+либо позже",
             )
             return
 
@@ -239,11 +283,14 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
 
         if message.text.endswith(MARKER_TO_DELETE):
             # Нудно удалить элемент
-            status, data = await service.del_item_from_shop_list(user_id, name_shop_list, message.text[:-len(MARKER_TO_DELETE)])
+            status, data = await service.del_item_from_shop_list(
+                user_id, name_shop_list, message.text[: -len(MARKER_TO_DELETE)]
+            )
             if status != 200:
                 await bot.send_message(
                     message.chat.id,
-                    "Что-то пошло не так при удалении из списка, попробуй снова, либо позже",
+                    "Что-то пошло не так при удалении из списка, попробуй \
+снова, либо позже",
                 )
                 return
 
@@ -251,7 +298,7 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
                 state.back_menu(user_id)
                 await bot.send_message(
                     message.chat.id,
-                    f"Список с покупками пустой.",
+                    "Список с покупками пустой.",
                     reply_markup=menu.shop_menu.markup,
                 )
                 return
@@ -263,7 +310,7 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
                 "Удален",
                 items,
             )
-            
+
             await bot.send_message(
                 message.chat.id,
                 cur_menu.title,
@@ -271,11 +318,14 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
             )
         else:
             # Нужно добавить в список
-            status, data = await service.add_items_to_shop_list(user_id, name_shop_list, message.text)
+            status, data = await service.add_items_to_shop_list(
+                user_id, name_shop_list, message.text
+            )
             if status != 200:
                 await bot.send_message(
                     message.chat.id,
-                    "Что-то пошло не так при добавление в список, попробуй снова, либо позже",
+                    "Что-то пошло не так при добавление в список, попробуй \
+снова, либо позже",
                 )
                 return
 
@@ -286,7 +336,7 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
                 "Элементы успешно добавлены",
                 items,
             )
-            
+
             await bot.send_message(
                 message.chat.id,
                 cur_menu.title,
@@ -295,4 +345,47 @@ async def shop_menu(message: Message, bot: AsyncTeleBot):
 
         return
 
-    await bot.send_message(message.chat.id, "shop")
+    elif state.get_menu(user_id) == "Связать список с Яндекс станцией":
+        status, data = await service.connect_to_alice(user_id, message.text)
+
+        if status != 200:
+            await bot.send_message(
+                message.chat.id,
+                "Что-то пошло не так, попробуй снова отправить ID списка, \
+либо позже",
+            )
+            return
+
+        state.back_menu(user_id)
+        await bot.send_message(
+            message.chat.id,
+            f"'{message.text}' список покупок стал списком по умолчанию \
+для записей с Яндекс станции.",
+            reply_markup=menu.shop_menu.markup,
+        )
+
+        first_num = str(user_id)
+        second_num = str(data["code"])
+        await bot.send_message(
+            message.chat.id,
+            f"Если вы еще не привязали аккаунт к Яндекс \
+станции, введите следущие цифры в окно для аутентификации в навыке Алисы\n\n\
+Первое число: {first_num[:3]}-{first_num[3:6]}-{first_num[6:]}\n\
+Второе число: {second_num[:3]}-{second_num[3:]}\n",
+            reply_markup=menu.shop_menu.markup,
+        )
+        await bot.send_message(
+            message.chat.id,
+            first_num,
+            reply_markup=menu.shop_menu.markup,
+        )
+        await bot.send_message(
+            message.chat.id,
+            second_num,
+            reply_markup=menu.shop_menu.markup,
+        )
+        return
+
+    await bot.send_message(
+        message.chat.id, "Что-то пошло не так, команда не обработана"
+    )
