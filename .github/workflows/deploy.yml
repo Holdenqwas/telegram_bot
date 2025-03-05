@@ -17,11 +17,11 @@ jobs:
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
       - name: Deploy to server
         run: |
           echo "Starting deployment..."
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /home/${{ secrets.SSH_USER }}/projects/telegram_bot && git pull origin master && docker build -t telegram_bot:latest . && docker compose -f /home/${{ secrets.SSH_USER }}/projects/composes/telegram.yaml down && docker compose -f /home/${{ secrets.SSH_USER }}/projects/composes/telegram.yaml up -d"
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /home/${{ secrets.SSH_USER }}/projects/telegram_bot && git pull origin master && docker build -t telegram_bot:latest . && docker compose -f /home/${{ secrets.SSH_USER }}/projects/composes/telegram.yaml down && docker compose -f /home/${{ secrets.SSH_USER }}/projects/composes/telegram.yaml up -d"
           echo "Deployment completed."
       - name: cleanup keys
         if: always()
